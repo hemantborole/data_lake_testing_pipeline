@@ -1,0 +1,2 @@
+"test_id (S)","active (N)","endedAt (S)","job (S)","job_arn (S)","job_input (M)","lastRunStatus (S)","platform (M)","startedAt (S)","validation_lambda_arn (S)","validation_rules_location (S)"
+"1","1","2020-10-16 05:07:56.350260","glue","arn:aws:glue:us-west-2:983401557995:job/TestDataLakeGlue","{  }","","{    ""DPU"" : { ""S"" : ""2"" }  }","2020-10-16 05:02:53.515794","arn:aws:lambda:us-west-2:983401557995:function:glueJobValidation","None"

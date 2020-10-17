@@ -1,0 +1,93 @@
+{
+  "Comment": "An example of the Amazon States Language using a choice state.",
+  "StartAt": "PickTest",
+
+  "States": {
+    "PickTest": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:::function:pickTest",
+      "Next": "ChoiceState"
+    },
+    "ChoiceState": {
+      "Type" : "Choice",
+      "Choices": [
+        {
+          "Variable": "$.job",
+          "StringEquals": "glue",
+          "Next": "GlueStepFunction"
+        },
+        {
+          "Variable": "$.job",
+          "StringEquals": "emr",
+          "Next": "EMRStepFunction"
+        },
+        {
+          "Variable": "$.job",
+          "StringEquals": "redshift",
+          "Next": "RedshiftStepFunction"
+        },
+        {
+          "Variable": "$.job",
+          "StringEquals": "athena",
+          "Next": "AthenaStepFunction"
+        },
+        {
+          "Variable": "$.job",
+          "StringEquals": "null",
+          "Next": "DefaultState"
+        }
+      ],
+      "Default": "DefaultState"
+    },
+
+    "GlueStepFunction": {
+      "Type": "Task",
+      "Resource":"arn:aws:states:::states:startExecution.sync:2",
+         "Parameters":{
+           "Input":{
+            "JobName.$":"$.TaskExecution",
+            "TaskValidation.$":"$.TaskValidation"
+           },
+           "StateMachineArn":"arn:aws:states:us-west-2:983401557995:stateMachine:TestingGlueJob"
+         },
+      "ResultPath": "$.output",
+      "Next": "PickTest"
+    },
+
+    
+    "AthenaStepFunction": {
+      "Type": "Task",
+      "Resource":"arn:aws:lambda:::function:finishtest",
+         "Parameters":{  
+            "JobName.$":"$.TaskExecution"
+         },
+      "ResultPath": "$.output",
+      "Next": "PickTest"
+    },
+    
+    "EMRStepFunction": {
+      "Type": "Task",
+      "Resource":"arn:aws:lambda:::function:finishtest",
+         "Parameters":{  
+            "JobName.$":"$.TaskExecution"
+         },
+      "ResultPath": "$.output",
+      "Next": "PickTest"
+    },
+    
+    "RedshiftStepFunction": {
+      "Type": "Task",
+      "Resource":"arn:aws:lambda:::function:finishtest",
+         "Parameters":{  
+            "JobName.$":"$.TaskExecution"
+         },
+      "ResultPath": "$.output",
+      "Next": "PickTest"
+    },
+
+    "DefaultState": {
+      "Type":"Succeed"
+    }
+  }
+}
+
