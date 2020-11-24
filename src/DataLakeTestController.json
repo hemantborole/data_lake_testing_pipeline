@@ -1,93 +1,99 @@
 {
   "Comment": "An example of the Amazon States Language using a choice state.",
-  "StartAt": "PickTest",
-
+  "StartAt": "Pick Test",
   "States": {
-    "PickTest": {
+    "Pick Test": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:::function:pickTest",
-      "Next": "ChoiceState"
+      "Next": "Choice State"
     },
-    "ChoiceState": {
-      "Type" : "Choice",
+    "Next Test": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:::function:nextTest",
+      "Next": "Pick Test"
+    },
+    "Choice State": {
+      "Type": "Choice",
       "Choices": [
         {
           "Variable": "$.job",
           "StringEquals": "glue",
-          "Next": "GlueStepFunction"
+          "Next": "Glue Step Function"
         },
         {
           "Variable": "$.job",
           "StringEquals": "emr",
-          "Next": "EMRStepFunction"
+          "Next": "EMR Step Function"
         },
         {
           "Variable": "$.job",
           "StringEquals": "redshift",
-          "Next": "RedshiftStepFunction"
+          "Next": "Redshift Step Function"
         },
         {
           "Variable": "$.job",
           "StringEquals": "athena",
-          "Next": "AthenaStepFunction"
+          "Next": "Athena Step Function"
         },
         {
           "Variable": "$.job",
-          "StringEquals": "null",
-          "Next": "DefaultState"
+          "StringEquals": "skip",
+          "Next": "Next Test"
         }
       ],
-      "Default": "DefaultState"
+      "Default": "Default State"
     },
-
-    "GlueStepFunction": {
+    "Glue Step Function": {
       "Type": "Task",
-      "Resource":"arn:aws:states:::states:startExecution.sync:2",
-         "Parameters":{
-           "Input":{
-            "JobName.$":"$.TaskExecution",
-            "TaskValidation.$":"$.TaskValidation"
-           },
-           "StateMachineArn":"arn:aws:states:us-west-2:983401557995:stateMachine:TestingGlueJob"
-         },
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "Input": {
+          "JobName.$": "$.TaskExecution",
+          "TaskValidation.$": "$.TaskValidation"
+        },
+        "StateMachineArn": "arn:aws:states:us-west-2:983401557995:stateMachine:TestingGlueJob"
+      },
       "ResultPath": "$.output",
-      "Next": "PickTest"
+      "Next": "Next Test"
     },
-
-    
-    "AthenaStepFunction": {
+    "Athena Step Function": {
       "Type": "Task",
-      "Resource":"arn:aws:lambda:::function:finishtest",
-         "Parameters":{  
-            "JobName.$":"$.TaskExecution"
-         },
+      "Resource": "arn:aws:lambda:::function:finishtest",
+      "Parameters": {
+        "JobName.$": "$.TaskExecution"
+      },
       "ResultPath": "$.output",
-      "Next": "PickTest"
+      "Next": "Next Test"
     },
-    
-    "EMRStepFunction": {
+    "EMR Step Function": {
       "Type": "Task",
-      "Resource":"arn:aws:lambda:::function:finishtest",
-         "Parameters":{  
-            "JobName.$":"$.TaskExecution"
-         },
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "Input": {
+          "ClusterId.$": "$.TaskExecution"
+        },
+        "StateMachineArn": "arn:aws:states:us-west-2:983401557995:stateMachine:TestingEMRJob"
+      },
       "ResultPath": "$.output",
-      "Next": "PickTest"
+      "Next": "Next Test"
     },
-    
-    "RedshiftStepFunction": {
+    "Redshift Step Function": {
       "Type": "Task",
-      "Resource":"arn:aws:lambda:::function:finishtest",
-         "Parameters":{  
-            "JobName.$":"$.TaskExecution"
-         },
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "Input": {
+          "JobName.$": "$.TaskExecution",
+          "TaskValidation.$": "$.TaskValidation",
+          "secret.$": "$.TaskExecution",
+          "params.$": "$.params"
+        },
+        "StateMachineArn": "arn:aws:states:us-west-2:983401557995:stateMachine:TestDataLakeRedshift"
+      },
       "ResultPath": "$.output",
-      "Next": "PickTest"
+      "Next": "Next Test"
     },
-
-    "DefaultState": {
-      "Type":"Succeed"
+    "Default State": {
+      "Type": "Succeed"
     }
   }
 }
-
